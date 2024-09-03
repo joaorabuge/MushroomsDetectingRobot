@@ -1,0 +1,212 @@
+FUNCTION_BLOCK cogumelos	
+
+
+
+VAR_INPUT
+
+	esquerda : REAL;
+	
+	meio : REAL;
+	
+	direita : REAL;
+	
+	cogumelo : REAL;
+	
+END_VAR
+
+
+
+VAR_OUTPUT
+    
+	velocidade : REAL;				
+	
+	angulo : REAL;
+	
+	acao : REAL;
+
+END_VAR
+
+
+
+FUZZIFY esquerda
+
+
+	TERM proximo := (1, 1) (2, 0.85) (3, 0.5) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0) (9, 0) (10, 0); 
+	
+
+
+	TERM meio := (1, 0) (2, 0) (3, 0) (4, 0.85) (5, 1) (6, 0.85) (7, 0.5) (8, 0) (9, 0) (10, 0);
+
+
+	TERM longe := (1, 0) (2, 0) (3, 0) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0.5) (9, 0.85) (10, 1);
+
+
+END_FUZZIFY
+
+FUZZIFY meio
+
+
+    TERM perto := (0,1) (1,0);
+
+
+	TERM proximo := (1, 1) (2, 0.85) (3, 0.5) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0) (9, 0) (10, 0); 
+
+
+	TERM meio := (1, 0) (2, 0) (3, 0) (4, 0.85) (5, 1) (6, 0.85) (7, 0.5) (8, 0) (9, 0) (10, 0);
+
+
+	TERM longe := (1, 0) (2, 0) (3, 0) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0.5) (9, 0.85) (10, 1);
+
+
+END_FUZZIFY
+
+FUZZIFY direita
+
+
+	TERM proximo := (1, 1) (2, 0.85) (3, 0.5) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0) (9, 0) (10, 0); 
+
+
+	TERM meio := (1, 0) (2, 0) (3, 0) (4, 0.85) (5, 1) (6, 0.85) (7, 0.5) (8, 0) (9, 0) (10, 0);
+
+
+	TERM longe := (1, 0) (2, 0) (3, 0) (4, 0) (5, 0) (6, 0) (7, 0) (8, 0.5) (9, 0.85) (10, 1);
+
+END_FUZZIFY
+
+
+
+FUZZIFY cogumelo
+
+
+TERM venenoso:=(0,1) (0.3,0);
+
+
+TERM nada := (0.2,0) (0.5,1) (0.8,0);
+
+
+TERM comestivel:=(0.7,0) (1,1);
+
+
+END_FUZZIFY
+
+
+
+DEFUZZIFY velocidade
+
+
+	TERM devagar := 25; 
+
+
+	TERM meio := 50;
+
+	TERM rapido := 75;
+	
+
+
+	METHOD : COGS;
+
+
+	DEFAULT := 25;
+
+
+END_DEFUZZIFY
+
+DEFUZZIFY angulo
+
+
+	TERM muitoaesquerda := -45;
+
+
+	TERM esquerda := -20;
+
+
+	TERM centro := 0;
+
+
+	TERM direita := 20;
+
+
+	TERM muitoadireita := 45;
+
+
+	METHOD : COGS;		
+
+
+	DEFAULT := 0;		
+
+
+END_DEFUZZIFY
+
+
+DEFUZZIFY acao
+
+
+	TERM naoacao := 5;
+
+
+	TERM destruir := 15;
+
+
+	TERM pickup := 25;
+
+
+	METHOD : COGS;		
+
+
+	DEFAULT := 5;		
+
+
+END_DEFUZZIFY
+
+
+RULEBLOCK No1
+
+	AND : MIN;			
+
+
+	ACT : MIN;			
+
+
+	ACCU : MAX;			
+
+
+	RULE 1 : IF esquerda IS proximo THEN angulo IS muitoaesquerda;
+
+
+	RULE 2 : IF meio IS proximo THEN angulo IS centro;
+
+
+	RULE 3 : IF direita IS proximo THEN angulo IS muitoadireita;
+
+
+	RULE 4 : IF esquerda IS meio THEN angulo IS esquerda;
+
+
+	RULE 5 : IF direita IS meio THEN angulo IS direita;
+
+
+	RULE 6 : IF meio IS meio THEN angulo IS centro;
+
+
+	RULE 7 : IF cogumelo IS venenoso AND meio IS perto THEN acao IS destruir;
+
+
+	RULE 8 : IF cogumelo IS nada THEN acao IS naoacao;
+
+
+	RULE 9 : IF cogumelo IS comestivel AND meio IS perto THEN acao IS pickup;
+
+
+	RULE 10 : IF esquerda IS proximo OR direita IS proximo OR meio IS proximo THEN velocidade IS devagar;
+
+
+	RULE 11 : IF esquerda IS meio OR direita IS meio OR meio IS meio THEN velocidade IS meio;
+
+
+	RULE 12 : IF esquerda IS longe OR direita IS longe OR meio IS longe THEN velocidade IS rapido;
+
+
+END_RULEBLOCK
+
+
+END_FUNCTION_BLOCK
